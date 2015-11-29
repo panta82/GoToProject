@@ -8,10 +8,15 @@ go_to_project() {
 	local res_quality=0
 
 	local fuzzy_match=
+	local fuzzy_word=
 	for (( i=0; i<${#query}; i++ )); do
-		fuzzy_match="${fuzzy_match}([^/]*)${query:$i:1}"
+		fuzzy_match="${fuzzy_match}(.*)${query:$i:1}"
+		fuzzy_word="${fuzzy_word}([^/]*)${query:$i:1}"
 	done
-	[[ $GTP_DEBUG > 0 ]] && echo "Fuzzy match: $fuzzy_match" && echo "----------------------------------"
+	fuzzy_match="${fuzzy_match}(.*)"
+	fuzzy_word="${fuzzy_word}([^/]*)"
+	
+	[[ $GTP_DEBUG > 0 ]] && echo "Fuzzy match: $fuzzy_match" && echo "Fuzzy word: $fuzzy_word" && echo "----------------------------------"
 
 	export go_to_project_res_dir="."
 	while read dir; do
@@ -53,11 +58,20 @@ go_to_project() {
 			fi
 		fi
 		
-		# Fuzzy search if no match was found so far
+		# If nothing is found so far, try to match a fuzzy word
+		# This only checks in between path separators (/)
+		if [[ $quality -le 0 ]] && [[ $file_name =~ $fuzzy_word ]]; then
+			local remaining_chars="${BASH_REMATCH[@]:1}"
+			quality=$((100 - ${#remaining_chars}))
+			debug_info="${debug_info}[FUZZY_WORD:${remaining_chars}(${#remaining_chars})->$quality]"
+		fi
+		
+		# If there is still no match, try to get a fuzzy match using the entire path.
+		# This match is penalized x2. We want pretty much anything else to win.
 		if [[ $quality -le 0 ]] && [[ $file_name =~ $fuzzy_match ]]; then
-			local middle_words="${BASH_REMATCH[@]:1}"
-			quality=$(expr 100 - ${#middle_words})
-			debug_info="${debug_info}[FUZZY:${middle_words}(${#middle_words})->$quality]"
+			local remaining_chars="${BASH_REMATCH[@]:1}"
+			quality=$((100 - ${#remaining_chars} * 2))
+			debug_info="${debug_info}[FUZZY_MATCH:${remaining_chars}(${#remaining_chars})->$quality]"
 		fi
 
 		# Give a little boost to git repositories

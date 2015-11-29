@@ -157,7 +157,7 @@ To activate the command right now, execute
 
 	source $HOME/.bashrc
 
-Or just restart the terminal session(s).
+Or just restart your active terminal session(s).
 You can re-run this installer at any time to change the options, or do so manually by editing .bashrc.
 
 EOF

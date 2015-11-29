@@ -128,10 +128,12 @@ generate_code() {
 
 GO_TO_PROJECT_ROOT="$GTP_ROOT"
 GO_TO_PROJECT_DEPTH=$GTP_DEPTH
-_GO_TO_PROJECT_FILE_NAME_CUTOFF_LENGTH=`expr ${#GO_TO_PROJECT_ROOT} + 1`
-
 EOF
+
+	echo '_GO_TO_PROJECT_FILE_NAME_CUTOFF_LENGTH=`expr ${#GO_TO_PROJECT_ROOT} + 1`'
+
 	cat $source_path
+	
 	cat <<EOF
 
 alias $GTP_ALIAS=go_to_project

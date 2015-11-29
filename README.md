@@ -29,7 +29,13 @@ GoToProject just picks the most likely match and `cd`-s there. It's that simple.
 
 ## Installation
 
-Clone the repository and run `install.sh`
+Paste this into your terminal and follow the on-screen instructions:
+
+```
+wget -O - https://raw.githubusercontent.com/panta82/GoToProject/master/install.sh | bash
+```
+
+Alternatively, if you're a jaded untrusting soul, you could clone the repository, inspect the content and *then* run `install.sh`,
 
 ## Licence
 

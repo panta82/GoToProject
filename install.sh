@@ -1,13 +1,13 @@
 [[ -z "${THIS_DIR}" ]] && THIS_DIR="$(cd $(dirname $0) && pwd)"
 
 fatal() {
-	echo "FATAL: " $@
+	echo "FATAL: " $@ >&2
 	exit 1
 }
 
 load_settings() {
-	REMOTE_PATH=""
-	WEBSITE="http://pantas.net"
+	REMOTE_SOURCE_PATH="https://raw.githubusercontent.com/panta82/GoToProject/master/gotoproject.sh"
+	WEBSITE="https://github.com/panta82/GoToProject"
 	DIALOG_COMMAND=""
 	
 	DEFAULT_ROOT='$HOME/dev'
@@ -32,12 +32,21 @@ detect_dialog_command() {
 	fi
 }
 
-determine_source_path() {
+prepare_source() {
 	source_path="${THIS_DIR}/gotoproject.sh"
-	if [[ ! -f ${source_path} ]]; then
-		echo "TODO"
-		exit 1
+	if [[ -f ${source_path} ]]; then
+		return
 	fi
+	
+	[[ -z ${REMOTE_SOURCE_PATH} ]] \
+		&& fatal "No local script source found and no remote path specified" 
+	
+	hash wget 2>/dev/null \
+		|| fatal "'wget' command not found. Either install wget, or do the manual install"
+	
+	source_path="/tmp/gotoproject.sh.$!"
+	wget -O ${source_path} -q ${REMOTE_SOURCE_PATH} \
+		|| fatal "Failed to download script source code from ${REMOTE_SOURCE_PATH}"
 }
 
 _do_show_dialog() {
@@ -171,7 +180,7 @@ confirmation() {
 main() {
 	load_settings
 	detect_dialog_command
-	determine_source_path
+	prepare_source
 	
 	welcome_screen
 	input_root

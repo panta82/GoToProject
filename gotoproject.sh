@@ -19,41 +19,41 @@ go_to_project() {
 		dir="${dir:11}"
 		dir=${dir,,}
 
-		# For empty query, just go to the most recent project
-		if [[ -z "$query" ]]; then
-			[[ $GTP_DEBUG > 0 ]] && "Empty query, picking the last changed dir (first provided)"
-			export go_to_project_res_dir="$dir"
-			break
-		fi
-
 		debug_info=""
 
 		local file_name="${dir:$_GO_TO_PROJECT_FILE_NAME_CUTOFF_LENGTH}"
 		file_name=${file_name,,}
 		
 		local quality=0
-
-		if [[ $file_name =~ $quality_A ]]; then 
-			quality=$((100))
-			debug_info="${debug_info}[A->$quality]"
-		fi
-
-		if [[ $file_name =~ $quality_B ]]; then 
-			quality=$((103))
-			debug_info="${debug_info}[B->$quality]"
-		fi
-
-		if [[ $file_name =~ $quality_C ]]; then
-			quality=$((107))
-			debug_info="${debug_info}[C->$quality]"
-		fi
-
-		if [[ $file_name =~ $quality_D ]]; then
-			quality=$((110))
-			debug_info="${debug_info}[D->$quality]"
+		
+		if [[ -z "$query" ]]; then
+			# Empty query, just hardcode some value here
+			quality=$((1000))
+			debug_info="${debug_info}[EMPTY->$quality]"
+		else
+			# Check through each quality class
+			if [[ $file_name =~ $quality_A ]]; then 
+				quality=$((100))
+				debug_info="${debug_info}[A->$quality]"
+			fi
+	
+			if [[ $file_name =~ $quality_B ]]; then 
+				quality=$((103))
+				debug_info="${debug_info}[B->$quality]"
+			fi
+	
+			if [[ $file_name =~ $quality_C ]]; then
+				quality=$((107))
+				debug_info="${debug_info}[C->$quality]"
+			fi
+	
+			if [[ $file_name =~ $quality_D ]]; then
+				quality=$((110))
+				debug_info="${debug_info}[D->$quality]"
+			fi
 		fi
 		
-		# Fuzzy search if no direct match was found
+		# Fuzzy search if no match was found so far
 		if [[ $quality -le 0 ]] && [[ $file_name =~ $fuzzy_match ]]; then
 			local middle_words="${BASH_REMATCH[@]:1}"
 			quality=$(expr 100 - ${#middle_words})

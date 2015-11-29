@@ -1,6 +1,6 @@
 # GoToProject
 
-A simple bash command to help developers navigate between projects.
+A simple bash command to help developers navigate between projects. Tested on Bash 4.3+.
 
 ## Usage:
 

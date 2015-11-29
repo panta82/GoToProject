@@ -84,8 +84,8 @@ welcome_screen() {
 	_do_show_dialog "--title 'GoToProject Install Wizard' --msgbox '\n
 	Hello! This wizard will help you install GoToDev onto your machine. \n
 	\n
-	The final product of this process will be: \n
-		- an added function and alias inside your $HOME/.bashrc file \n
+	The final product of this process will be an added function \n
+	and alias inside your $HOME/.bashrc file \n
 	\n
 	For more information, please visit ${WEBSITE} \n
 	\n
@@ -150,11 +150,17 @@ do_output_to_file() {
 
 do_install_bashrc() {
 	do_output_to_file "$HOME/.bashrc"
-	echo "GoToProject was installed to $HOME/.bashrc"
-	echo ""
-	echo "To activate the command right now, execute 'source \$HOME/.bashrc'"
-	echo "Or just restart the terminal session(s)"
-	echo ""
+	cat <<EOF
+GoToProject was installed to $HOME/.bashrc
+	
+To activate the command right now, execute
+
+	source $HOME/.bashrc
+
+Or just restart the terminal session(s).
+You can re-run this installer at any time to change the options, or do so manually by editing .bashrc.
+
+EOF
 }
 
 do_install_stdout() {

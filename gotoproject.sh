@@ -11,7 +11,7 @@ go_to_project() {
 	for (( i=0; i<${#query}; i++ )); do
 		fuzzy_match="${fuzzy_match}([^/]*)${query:$i:1}"
 	done
-	[[ $DEBUG > 0 ]] && echo "Fuzzy match: $fuzzy_match" && echo "----------------------------------"
+	[[ $GTP_DEBUG > 0 ]] && echo "Fuzzy match: $fuzzy_match" && echo "----------------------------------"
 
 	export go_to_project_res_dir="."
 	while read dir; do
@@ -21,7 +21,7 @@ go_to_project() {
 
 		# For empty query, just go to the most recent project
 		if [[ -z "$query" ]]; then
-			[[ $DEBUG > 0 ]] && "Empty query, picking the last changed dir (first provided)"
+			[[ $GTP_DEBUG > 0 ]] && "Empty query, picking the last changed dir (first provided)"
 			export go_to_project_res_dir="$dir"
 			break
 		fi
@@ -66,7 +66,7 @@ go_to_project() {
 			debug_info="${debug_info}[GIT->$quality]"
 		fi
 
-		[[ $DEBUG > 0 ]] && printf "%-60s | %-30s | %s\n" "$dir" "$debug_info" "$quality"
+		[[ $GTP_DEBUG > 0 ]] && printf "%-60s | %-30s | %s\n" "$dir" "$debug_info" "$quality"
 		
 		# If better quality than existing, replace
 		if [[ $quality -gt $res_quality ]]; then
@@ -75,6 +75,6 @@ go_to_project() {
 		fi
 	done < <(find $GO_TO_PROJECT_ROOT -maxdepth $GO_TO_PROJECT_DEPTH -type d -exec stat -c '%Y %n' '{}' + | sort -gr)
 
-	[[ $DEBUG > 0 ]] && echo "----------------------------------" && echo "Destination: $go_to_project_res_dir"
+	[[ $GTP_DEBUG > 0 ]] && echo "----------------------------------" && echo "Destination: $go_to_project_res_dir"
 	cd "$go_to_project_res_dir"
 }

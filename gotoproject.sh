@@ -1,7 +1,3 @@
-#GO_TO_PROJECT_ROOT="${HOME}/dev"
-#GO_TO_PROJECT_DEPTH=3
-#_GO_TO_PROJECT_FILE_NAME_CUTOFF_LENGTH=`expr ${#GO_TO_PROJECT_ROOT} + 1`
-
 go_to_project() {
 	local query="${1,,}"
 	local quality_A="$query"
@@ -82,5 +78,3 @@ go_to_project() {
 	[[ $DEBUG > 0 ]] && echo "----------------------------------" && echo "Destination: $go_to_project_res_dir"
 	cd "$go_to_project_res_dir"
 }
-
-#alias gd=go_to_project

@@ -7,12 +7,16 @@ fatal() {
 
 load_settings() {
 	REMOTE_PATH=""
+	WEBSITE="http://pantas.net"
 	DIALOG_COMMAND=""
 	
 	DEFAULT_ROOT='$HOME/dev'
 	DEFAULT_DEPTH='3'
+	DEFAULT_ALIAS='gd'
 	
-	GO_TO_PROJECT_ROOT=''
+	GTP_ROOT=''
+	GTP_DEPTH=''
+	GTP_ALIAS=''
 }
 
 detect_dialog_command() {
@@ -67,21 +71,114 @@ _do_show_dialog() {
 	return $exit_code
 }
 
-input_root() {
-	[[ ! -z $GO_TO_PROJECT_ROOT ]] && return 
-	_do_show_dialog "--title 'Root path' --inputbox 'Enter the path where you keep your projects (tip: you can enter \$HOME for your home folder)' 10 40 '$DEFAULT_ROOT'" \
+welcome_screen() {
+	_do_show_dialog "--title 'GoToProject Install Wizard' --msgbox '\n
+	Hello! This wizard will help you install GoToDev onto your machine. \n
+	\n
+	The final product of this process will be: \n
+		- an added function and alias inside your $HOME/.bashrc file \n
+	\n
+	For more information, please visit ${WEBSITE} \n
+	\n
+	Press enter to start the installation or ESC to cancel. \n
+	' 15 85" \
 		|| fatal "Installation cancelled"
-	GO_TO_PROJECT_ROOT="$DIALOG_RESULT"
 }
 
+input_root() {
+	[[ ! -z $GTP_ROOT ]] && return 
+	_do_show_dialog "--title 'Projects root' --inputbox 'Enter the path where you keep your projects (tip: you can enter \$HOME for your home folder)' 10 40 '$DEFAULT_ROOT'" \
+		|| fatal "Installation cancelled"
+	GTP_ROOT="$DIALOG_RESULT"
+}
 
+input_depth() {
+	[[ ! -z $GTP_DEPTH ]] && return 
+	_do_show_dialog "--title 'Search depth' --inputbox 'Max depth when searching through your project hiearchy' 10 40 '$DEFAULT_DEPTH'" \
+		|| fatal "Installation cancelled"
+	GTP_DEPTH="$DIALOG_RESULT"
+}
+
+input_alias() {
+	[[ ! -z $GTP_ALIAS ]] && return 
+	_do_show_dialog "--title 'Command alias' --inputbox 'Alias under which to install GoToProject (this is what you type in your console to run the command)' 10 40 '$DEFAULT_ALIAS'" \
+		|| fatal "Installation cancelled"
+	GTP_ALIAS="$DIALOG_RESULT"
+}
+
+generate_code() {
+	cat <<EOF
+#[GO_TO_PROJECT_CODE_START]
+
+# #############
+# GoToProject #
+###############
+#
+# For details and license, please visit: ${WEBSITE}
+#
+
+GO_TO_PROJECT_ROOT="$GTP_ROOT"
+GO_TO_PROJECT_DEPTH=$GTP_DEPTH
+_GO_TO_PROJECT_FILE_NAME_CUTOFF_LENGTH=`expr ${#GO_TO_PROJECT_ROOT} + 1`
+
+EOF
+	cat $source_path
+	cat <<EOF
+
+alias $GTP_ALIAS=go_to_project
+
+#[GO_TO_PROJECT_CODE_END]
+EOF
+}
+
+do_output_to_file() {
+	local target_path="$1"
+	
+	local tmp_filename="/tmp/gtp_target.$!"
+	sed -e '1h;2,$H;$!d;g' -re 's/\n*#\[GO_TO_PROJECT_CODE_START\].*#\[GO_TO_PROJECT_CODE_END]\n*//' $target_path > $tmp_filename
+	{ cat $tmp_filename ; echo "" ; generate_code ; } > $target_path
+}
+
+do_install_bashrc() {
+	do_output_to_file "$HOME/.bashrc"
+	echo "GoToProject was installed to $HOME/.bashrc"
+	echo ""
+	echo "To activate the command right now, execute 'source \$HOME/.bashrc'"
+	echo "Or just restart the terminal session(s)"
+	echo ""
+}
+
+do_install_stdout() {
+	generate_code
+}
+
+confirmation() {
+	_do_show_dialog "--title 'Ready to install' --menu '\n
+	GoToProject is ready to be installed with the following options:\n
+	     Root: $GTP_ROOT \n
+	    Depth: $GTP_DEPTH \n
+	    Alias: $GTP_ALIAS \n
+	\n
+	Please chose the install target
+	' 17 70 2 bashrc 'Modify your $HOME/.bashrc' stdout 'Print the code into the terminal'" \
+		|| fatal "Installation cancelled"
+	
+	local fn="do_install_${DIALOG_RESULT}"
+
+	$fn
+}
 
 main() {
 	load_settings
 	detect_dialog_command
 	determine_source_path
 	
+	welcome_screen
 	input_root
+	input_depth
+	input_alias
+	
+	confirmation
 }
 
 main

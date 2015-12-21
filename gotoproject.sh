@@ -1,5 +1,7 @@
 go_to_project() {
-	local query="${1,,}"
+	local query="$@"
+	local query_arr=("$@")
+
 	local quality_A="$query"
 	local quality_B="[\\b/_-.]$query[\\b/_-.]"
 	local quality_C="[\\b/]$query[\\b/]"
@@ -9,9 +11,13 @@ go_to_project() {
 
 	local fuzzy_match=
 	local fuzzy_word=
-	for (( i=0; i<${#query}; i++ )); do
-		fuzzy_match="${fuzzy_match}(.*)${query:$i:1}"
-		fuzzy_word="${fuzzy_word}([^/]*)${query:$i:1}"
+	local i=
+	local j=
+	for (( i=0; i<${#query_arr[@]}; i++ )); do
+		for (( j=0; j<${#query_arr[$i]}; j++ )); do
+			fuzzy_match="${fuzzy_match}(.*)${query_arr[$i]:$j:1}"
+			fuzzy_word="${fuzzy_word}([^/]*)${query_arr[$i]:$j:1}"
+		done
 	done
 	fuzzy_match="${fuzzy_match}(.*)"
 	fuzzy_word="${fuzzy_word}([^/]*)"

@@ -37,6 +37,13 @@ wget -O- -q https://raw.githubusercontent.com/panta82/GoToProject/master/install
 
 Alternatively, if you're a jaded untrusting soul, you could clone the repository, inspect the content and *then* run `install.sh`,
 
+## Version history
+
+Version|Description
+-------|-----------
+0.1    | Initial release
+0.2    | Better fuzzy parsing when used with multiple arguments. Eg. `gd word1 word2`
+
 ## Licence
 
 MIT

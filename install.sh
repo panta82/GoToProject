@@ -17,6 +17,8 @@ load_settings() {
 	GTP_ROOT=''
 	GTP_DEPTH=''
 	GTP_ALIAS=''
+	
+	GTP_COMMAND_STAT=''
 }
 
 detect_dialog_command() {
@@ -29,6 +31,20 @@ detect_dialog_command() {
 		DIALOG_COMMAND="whiptail"
 	else
 		fatal "No dialog program found. Try installing 'dialog' or 'whiptail'"
+	fi
+}
+
+detect_environment() {
+	[[ $BASH_VERSION =~ 4\.3 ]] || fatal "GoToProject requires minimum bash 4.3"
+
+	local sysname="$(uname -s)"
+	if [[ $sysname = "Linux" ]]; then
+		GTP_COMMAND_STAT='stat'
+	elif [[ $sysname = "Darwin" ]]; then
+		[[ $(type -t gstat) == "file" ]] || fatal "Requirement missing: coreutils. Try: brew install coreutils"
+		GTP_COMMAND_STAT='gstat'
+	else
+		fatal "Unsupported nix type: $sysname"
 	fi
 }
 
@@ -128,6 +144,7 @@ generate_code() {
 
 GO_TO_PROJECT_ROOT="$GTP_ROOT"
 GO_TO_PROJECT_DEPTH=$GTP_DEPTH
+GO_TO_PROJECT_STAT="$GTP_COMMAND_STAT"
 EOF
 
 	echo '_GO_TO_PROJECT_FILE_NAME_CUTOFF_LENGTH=`expr ${#GO_TO_PROJECT_ROOT} + 1`'
@@ -146,10 +163,10 @@ do_output_to_file() {
 	local target_path="$1"
 	
 	touch $target_path
-    local tmp_filename="/tmp/gtp_target.$!"
+	local tmp_filename="/tmp/gtp_target.$!"
 	sed -e '1h;2,$H;$!d;g' -e 's/\n*#\[GO_TO_PROJECT_CODE_START\].*#\[GO_TO_PROJECT_CODE_END]\n*/\
 /' $target_path > $tmp_filename \
-        || fatal "Failed to process $target_path"
+		|| fatal "Failed to process $target_path"
 	{ cat $tmp_filename ; echo "" ; generate_code ; } > $target_path
 }
 
@@ -201,6 +218,7 @@ confirmation() {
 main() {
 	load_settings
 	detect_dialog_command
+	detect_environment
 	prepare_source
 	
 	welcome_screen

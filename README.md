@@ -43,7 +43,7 @@ Version|Description
 -------|-----------
 0.1    | Initial release
 0.2    | Better fuzzy parsing when used with multiple arguments. Eg. `gd word1 word2`
-0.3    | Better installer, safety. Mac/BSD support
+0.3    | Better installer safety. Mac/BSD support
 
 ## TODO
 

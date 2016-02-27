@@ -93,7 +93,7 @@ go_to_project() {
 			res_quality="$quality"
 			export go_to_project_res_dir="$dir"
 		fi
-	done < <(find $GO_TO_PROJECT_ROOT -maxdepth $GO_TO_PROJECT_DEPTH -type d -exec stat -c '%Y %n' '{}' + | sort -gr)
+	done < <(find $GO_TO_PROJECT_ROOT -maxdepth $GO_TO_PROJECT_DEPTH -type d -exec $GO_TO_PROJECT_STAT --format '%Y %n' '{}' + | sort -gr)
 
 	[[ $GTP_DEBUG > 0 ]] && echo "----------------------------------" && echo "Destination: $go_to_project_res_dir"
 	cd "$go_to_project_res_dir"

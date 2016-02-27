@@ -28,7 +28,6 @@ go_to_project() {
 	while read dir; do
 		# Remove the timestamp prefix: "1382563122 /a/b/c" -> "/a/b/c"
 		dir="${dir:11}"
-		dir=${dir,,}
 
 		debug_info=""
 

@@ -145,24 +145,37 @@ EOF
 do_output_to_file() {
 	local target_path="$1"
 	
-	local tmp_filename="/tmp/gtp_target.$!"
-	sed -e '1h;2,$H;$!d;g' -re 's/\n*#\[GO_TO_PROJECT_CODE_START\].*#\[GO_TO_PROJECT_CODE_END]\n*//' $target_path > $tmp_filename
+	touch $target_path
+    local tmp_filename="/tmp/gtp_target.$!"
+	sed -e '1h;2,$H;$!d;g' -e 's/\n*#\[GO_TO_PROJECT_CODE_START\].*#\[GO_TO_PROJECT_CODE_END]\n*/\
+/' $target_path > $tmp_filename \
+        || fatal "Failed to process $target_path"
 	{ cat $tmp_filename ; echo "" ; generate_code ; } > $target_path
 }
 
-do_install_bashrc() {
-	do_output_to_file "$HOME/.bashrc"
+do_install_file() {
+    local file="$1"
+    
+    do_output_to_file "$file"
 	cat <<EOF
-GoToProject was installed to $HOME/.bashrc
+GoToProject was installed to $file
 	
 To activate the command right now, execute
 
-	source $HOME/.bashrc
+	source $file
 
 Or just restart your active terminal session(s).
 You can re-run this installer at any time to change the options, or do so manually by editing .bashrc.
 
 EOF
+}
+
+do_install_bashrc() {
+	do_install_file "$HOME/.bashrc"
+}
+
+do_install_bash_profile() {
+	do_install_file "$HOME/.bash_profile"
 }
 
 do_install_stdout() {
@@ -177,7 +190,7 @@ confirmation() {
 	    Alias: $GTP_ALIAS \n
 	\n
 	Please chose the install target
-	' 17 70 2 bashrc 'Modify your $HOME/.bashrc' stdout 'Print the code into the terminal'" \
+	' 17 70 4 bashrc 'Modify your $HOME/.bashrc' bash_profile 'Modify your $HOME/.bash_profile' stdout 'Print the code into the terminal'" \
 		|| fatal "Installation cancelled"
 	
 	local fn="do_install_${DIALOG_RESULT}"

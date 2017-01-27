@@ -35,7 +35,8 @@ detect_dialog_command() {
 }
 
 detect_environment() {
-	[[ $BASH_VERSION =~ 4\.3 ]] || fatal "GoToProject requires minimum bash 4.3"
+	local bash_version_regex='^[4-9]\.[3-9]'
+	[[ $BASH_VERSION =~ $bash_version_regex ]] || fatal "GoToProject requires minimum bash 4.3"
 
 	local sysname="$(uname -s)"
 	if [[ $sysname = "Linux" ]]; then

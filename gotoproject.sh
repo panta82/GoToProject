@@ -3,8 +3,8 @@ go_to_project() {
 	local query_arr=("$@")
 
 	local quality_A="$query"
-	local quality_B="[\\b/_-.]$query[\\b/_-.]"
-	local quality_C="[\\b/]$query[\\b/]"
+	local quality_B='(\b|[/_.-])'"$query"'(\b|[/_.-])'
+	local quality_C='(\b|/)'"$query"'(\b|/)'
 	local quality_D="^$query$"
 	local debug_info=""
 	local res_quality=0

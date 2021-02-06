@@ -12,10 +12,12 @@ load_settings() {
 	
 	DEFAULT_ROOT='$HOME/dev'
 	DEFAULT_DEPTH='3'
+	DEFAULT_EXCLUDE='node_modules,.git'
 	DEFAULT_ALIAS='gd'
 	
 	GTP_ROOT=''
 	GTP_DEPTH=''
+	GTP_EXCLUDE=''
 	GTP_ALIAS=''
 	
 	GTP_COMMAND_STAT=''
@@ -35,7 +37,7 @@ detect_dialog_command() {
 }
 
 detect_environment() {
-	local bash_version_regex='^[4-9]\.[3-9]'
+	local bash_version_regex='^4\.[3-9]|^[5-9]'
 	[[ $BASH_VERSION =~ $bash_version_regex ]] || fatal "GoToProject requires minimum bash 4.3"
 
 	local sysname="$(uname -s)"
@@ -125,6 +127,13 @@ input_depth() {
 	GTP_DEPTH="$DIALOG_RESULT"
 }
 
+input_exclude() {
+	[[ ! -z $GTP_EXCLUDE ]] && return 
+	_do_show_dialog "--title 'Exclude list' --inputbox 'Comma-separated list of directories to exclude from search' 10 40 '$DEFAULT_EXCLUDE'" \
+		|| fatal "Installation cancelled"
+	GTP_EXCLUDE="$DIALOG_RESULT"
+}
+
 input_alias() {
 	[[ ! -z $GTP_ALIAS ]] && return 
 	_do_show_dialog "--title 'Command alias' --inputbox 'Alias under which to install GoToProject (this is what you type in your console to run the command)' 10 40 '$DEFAULT_ALIAS'" \
@@ -146,9 +155,9 @@ generate_code() {
 GO_TO_PROJECT_ROOT="$GTP_ROOT"
 GO_TO_PROJECT_DEPTH=$GTP_DEPTH
 GO_TO_PROJECT_STAT="$GTP_COMMAND_STAT"
-EOF
+GO_TO_PROJECT_EXCLUDE_DIRS="$GTP_EXCLUDE"
 
-	echo '_GO_TO_PROJECT_FILE_NAME_CUTOFF_LENGTH=`expr ${#GO_TO_PROJECT_ROOT} + 1`'
+EOF
 
 	cat $source_path
 	
@@ -225,6 +234,7 @@ main() {
 	welcome_screen
 	input_root
 	input_depth
+	input_exclude
 	input_alias
 	
 	confirmation

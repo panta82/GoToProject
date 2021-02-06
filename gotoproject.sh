@@ -1,3 +1,24 @@
+[[ -z ${GO_TO_PROJECT_ROOT} ]] && GO_TO_PROJECT_ROOT="$HOME"
+[[ -z ${GO_TO_PROJECT_DEPTH} ]] && GO_TO_PROJECT_DEPTH="4"
+[[ -z ${GO_TO_PROJECT_STAT} ]] && GO_TO_PROJECT_STAT="stat"
+[[ -z ${GO_TO_PROJECT_EXCLUDE_DIRS} ]] && GO_TO_PROJECT_EXCLUDE_DIRS=""
+
+_GO_TO_PROJECT_FILE_NAME_CUTOFF_LENGTH=`expr ${#GO_TO_PROJECT_ROOT} + 1`
+
+IFS=',' read -r -a _GO_TO_PROJECT_EXCLUDE_DIRS_ARRAY <<< "$GO_TO_PROJECT_EXCLUDE_DIRS"
+if [[ ${#_GO_TO_PROJECT_EXCLUDE_DIRS_ARRAY[@]} -eq 0 ]]; then
+    _GO_TO_PROJECT_EXCLUDE_ARGS=( )
+else
+    _GO_TO_PROJECT_EXCLUDE_ARGS=( -type d \( )
+    for index in "${!_GO_TO_PROJECT_EXCLUDE_DIRS_ARRAY[@]}"; do
+        if [[ $index -gt 0 ]]; then
+            _GO_TO_PROJECT_EXCLUDE_ARGS+=( -o )
+        fi
+        _GO_TO_PROJECT_EXCLUDE_ARGS+=( -name ${_GO_TO_PROJECT_EXCLUDE_DIRS_ARRAY[$index]} )
+    done
+    _GO_TO_PROJECT_EXCLUDE_ARGS+=( \) -prune -false -o )
+fi
+
 go_to_project() {
 	local query="$@"
 	local query_arr=("$@")
@@ -92,7 +113,7 @@ go_to_project() {
 			res_quality="$quality"
 			export go_to_project_res_dir="$dir"
 		fi
-	done < <(find $GO_TO_PROJECT_ROOT -maxdepth $GO_TO_PROJECT_DEPTH -type d -exec $GO_TO_PROJECT_STAT --format '%Y %n' '{}' + | sort -gr)
+	done < <(find $GO_TO_PROJECT_ROOT -maxdepth $GO_TO_PROJECT_DEPTH ${_GO_TO_PROJECT_EXCLUDE_ARGS[@]} -type d -exec $GO_TO_PROJECT_STAT --format '%Y %n' '{}' + | sort -gr)
 
 	[[ $GTP_DEBUG > 0 ]] && echo "----------------------------------" && echo "Destination: $go_to_project_res_dir"
 	cd "$go_to_project_res_dir"
